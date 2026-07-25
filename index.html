@@ -7,18 +7,23 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css" />
 <style>
   :root {
-    --bg: #F5F4EF;
+    --bg: #F3F1EA;
     --card: #FFFFFF;
-    --ink: #26251F;
-    --ink-soft: #6E6C62;
-    --ink-faint: #9A978A;
-    --line: #E3E0D4;
-    --line-strong: #CFCBBB;
-    --accent: #2C5D63;
-    --accent-ink: #1B3C40;
-    --accent-bg: #E4EDEB;
-    --warn-bg: #F6ECE2;
-    --warn-ink: #8A5A26;
+    --ink: #1C1B16;
+    --ink-soft: #5C5A50;
+    --ink-faint: #8E8B7D;
+    --line: #E4E0D2;
+    --line-strong: #C7C2AE;
+    --accent: #1E4E52;
+    --accent-hover: #163B3E;
+    --accent-ink: #123336;
+    --accent-bg: #DEEAE7;
+    --warn-bg: #F7E9D8;
+    --warn-ink: #855416;
+    --danger-ink: #A23B2E;
+    --danger-bg: #FBEAE5;
+    --shadow-card: 0 1px 2px rgba(28,27,22,0.05), 0 16px 32px -18px rgba(28,27,22,0.28);
+    --shadow-soft: 0 1px 2px rgba(28,27,22,0.05);
     --radius: 10px;
     --font-serif: Georgia, "Iowan Old Style", "Nanum Myeongjo", serif;
     --font-sans: -apple-system, "Malgun Gothic", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
@@ -26,73 +31,115 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1B1C19; --card: #232420; --ink: #EDEBE3; --ink-soft: #A8A597; --ink-faint: #78766A;
-      --line: #35362F; --line-strong: #47483F; --accent: #7FB8BE; --accent-ink: #CFE7E9;
-      --accent-bg: #26332F; --warn-bg: #332A1E; --warn-ink: #E0B37E;
+      --bg: #171815; --card: #212220; --ink: #F1EEE4; --ink-soft: #B2AE9E; --ink-faint: #7A7669;
+      --line: #34352F; --line-strong: #47483F; --accent: #79BAB9; --accent-hover: #91CBCA;
+      --accent-ink: #CFEBEA; --accent-bg: #223533; --warn-bg: #34291A; --warn-ink: #E7B876;
+      --danger-ink: #E68B7C; --danger-bg: #3A241F;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 16px 32px -18px rgba(0,0,0,0.55);
+      --shadow-soft: 0 1px 2px rgba(0,0,0,0.3);
     }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  body { background: var(--bg); padding: 40px 20px 60px; }
+  body { background: var(--bg); padding: 48px 20px 64px; -webkit-font-smoothing: antialiased; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   .wrap { max-width: 620px; margin: 0 auto; font-family: var(--font-sans); color: var(--ink); }
-  .eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--accent-ink); background: var(--accent-bg);
-    display: inline-block; padding: 3px 10px; border-radius: 100px; font-weight: 500; }
-  h1 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; margin: 14px 0 6px; text-wrap: balance; }
-  .lead { font-size: 14.5px; line-height: 1.65; color: var(--ink-soft); margin: 0 0 4px; max-width: 56ch; }
-  .notice { margin: 18px 0 26px; padding: 14px 16px; background: var(--warn-bg); border-radius: var(--radius);
-    font-size: 13.5px; line-height: 1.65; color: var(--warn-ink); }
+
+  .eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; letter-spacing: .06em;
+    color: var(--accent-ink); background: var(--accent-bg); padding: 5px 12px 5px 10px; border-radius: 100px;
+    font-weight: 600; }
+  .eyebrow i { font-size: 14px; }
+  h1 { font-family: var(--font-serif); font-size: 30px; font-weight: 400; letter-spacing: -.01em;
+    margin: 16px 0 8px; text-wrap: balance; color: var(--ink); }
+  .lead { font-size: 15px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 4px; max-width: 58ch; }
+
+  .notice { margin: 20px 0 28px; padding: 14px 16px; background: var(--warn-bg); border-radius: var(--radius);
+    font-size: 13.5px; line-height: 1.65; color: var(--warn-ink); display: flex; gap: 10px; }
+  .notice i { flex-shrink: 0; font-size: 17px; margin-top: 1px; }
   .notice b { color: inherit; }
-  .card { background: var(--card); border: 0.5px solid var(--line); border-radius: 14px; padding: 26px 28px; }
-  .field { margin-bottom: 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 30px 32px;
+    box-shadow: var(--shadow-card); }
+  .field { margin-bottom: 20px; }
   .field:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 6px; }
-  label .req { color: var(--warn-ink); margin-left: 2px; }
-  .hint { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 7px;
+    letter-spacing: .01em; }
+  label .req { color: var(--danger-ink); margin-left: 3px; }
+  .hint { font-size: 12px; line-height: 1.55; color: var(--ink-faint); margin-top: 6px; }
+
   input[type="text"], input[type="tel"], input[type="number"], textarea {
     width: 100%; font-family: var(--font-sans); font-size: 14.5px; color: var(--ink);
-    background: var(--bg); border: 0.5px solid var(--line-strong); border-radius: 8px;
-    padding: 10px 12px; outline: none;
+    background: var(--bg); border: 1px solid var(--line-strong); border-radius: 8px;
+    padding: 11px 12px; outline: none; transition: border-color .12s, box-shadow .12s;
   }
-  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-  textarea { resize: vertical; min-height: 64px; font-family: inherit; line-height: 1.55; }
+  input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3.5px var(--accent-bg); }
+  textarea { resize: vertical; min-height: 68px; font-family: inherit; line-height: 1.55; }
+
   .row2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
   .fee-wrap, .headcount-wrap { position: relative; }
-  .unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--ink-faint); pointer-events: none; }
-  .fee-wrap input, .headcount-wrap input { padding-right: 34px; }
-  button.submit {
-    width: 100%; margin-top: 22px; padding: 12px; border-radius: 8px; border: none;
-    background: var(--accent); color: var(--card); font-size: 14.5px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-  }
+  .unit { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); font-size: 13px;
+    color: var(--ink-faint); pointer-events: none; font-weight: 500; }
+  .fee-wrap input, .headcount-wrap input { padding-right: 36px; }
+
+  .upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 4px; border: 1.5px dashed var(--line-strong); border-radius: 12px;
+    padding: 28px 20px; cursor: pointer; background: var(--bg); transition: border-color .12s, background .12s; }
+  .upload-zone:hover, .upload-zone:focus-visible { border-color: var(--accent); background: var(--accent-bg); }
+  .upload-zone.drag { border-color: var(--accent); background: var(--accent-bg); }
+  .upload-zone i.ti-file-upload { font-size: 26px; color: var(--accent); margin-bottom: 4px; }
+  .upload-text { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+  .upload-strong { color: var(--accent-ink); font-weight: 600; }
+  .upload-sub { margin: 0; font-size: 12px; color: var(--ink-faint); }
+
+  .file-chip { display: none; align-items: center; gap: 10px; border: 1px solid var(--line-strong);
+    border-radius: 10px; padding: 10px 12px; background: var(--bg); }
+  .file-chip i.ti-file-type-pdf { font-size: 22px; color: var(--danger-ink); flex-shrink: 0; }
+  .file-chip-name { font-size: 13.5px; font-weight: 500; color: var(--ink); overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .file-chip-size { font-size: 12px; color: var(--ink-faint); flex-shrink: 0; }
+  .file-chip-remove { border: none; background: transparent; color: var(--ink-faint); cursor: pointer;
+    padding: 4px; border-radius: 6px; display: flex; }
+  .file-chip-remove:hover { background: var(--line); color: var(--ink); }
+
+  .field-err { font-size: 12.5px; color: var(--danger-ink); margin-top: 6px; display: none; }
+
+  button.submit { width: 100%; margin-top: 26px; padding: 13px; border-radius: 9px; border: none;
+    background: var(--accent); color: var(--card); font-size: 14.5px; font-weight: 600;
+    cursor: pointer; font-family: inherit; box-shadow: var(--shadow-soft); transition: background .12s, transform .08s; }
+  button.submit:hover { background: var(--accent-hover); }
   button.submit:active { transform: scale(0.99); }
-  .err { font-size: 12.5px; color: var(--warn-ink); margin-top: 10px; display: none; }
-  .result { margin-top: 22px; }
-  .result-card { background: var(--accent-bg); border-radius: 12px; padding: 18px 20px; }
-  .result-title { font-size: 13px; font-weight: 500; color: var(--accent-ink); margin: 0 0 10px; }
-  pre.summary { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75; color: var(--ink);
+  .err { font-size: 12.5px; color: var(--danger-ink); margin-top: 10px; display: none; }
+
+  .result { margin-top: 24px; }
+  .result-card { background: var(--accent-bg); border-radius: 14px; padding: 20px 22px; }
+  .result-title { font-size: 13px; font-weight: 600; color: var(--accent-ink); margin: 0 0 12px;
+    display: flex; align-items: center; gap: 6px; }
+  pre.summary { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.8; color: var(--ink);
     white-space: pre-wrap; word-break: break-word; margin: 0 0 14px; background: var(--card);
-    border: 0.5px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+    border: 1px solid var(--line); border-radius: 9px; padding: 14px 16px; box-shadow: var(--shadow-soft); }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .actions button { flex: 1; min-width: 120px; padding: 9px 12px; border-radius: 8px;
-    border: 0.5px solid var(--line-strong); background: var(--card); color: var(--ink);
-    font-size: 13px; font-family: inherit; cursor: pointer; }
-  .actions button:hover { background: var(--bg); }
-  .actions button.done { border-color: var(--accent); color: var(--accent-ink); }
-  .contact { margin-top: 8px; font-size: 12.5px; color: var(--ink-soft); }
-  .contact b { color: var(--accent-ink); font-weight: 500; }
-  .foot { text-align: center; font-size: 11.5px; color: var(--ink-faint); margin: 20px 0 4px; }
+  .actions button { flex: 1; min-width: 130px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--line-strong); background: var(--card); color: var(--ink);
+    font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background .12s, border-color .12s; }
+  .actions button:hover { background: var(--bg); border-color: var(--accent); }
+  .actions button.done { border-color: var(--accent); color: var(--accent-ink); background: var(--card); }
+
+  .contact { margin-top: 10px; font-size: 12.5px; color: var(--ink-soft); }
+  .contact b { color: var(--accent-ink); font-weight: 600; }
+  .foot { text-align: center; font-size: 11.5px; color: var(--ink-faint); margin: 22px 0 4px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h2 class="sr-only">1급 자격 보유자가 2급 자격과정 운영 사실을 운영진에 신고하는 설문 양식</h2>
-  <span class="eyebrow">2급 자격과정 운영 신고</span>
+  <span class="eyebrow"><i class="ti ti-clipboard-check" aria-hidden="true"></i>2급 자격과정 운영 신고</span>
   <h1>운영 신고서</h1>
   <p class="lead">1급 자격 보유자께서 2급 자격과정을 운영하실 때 운영진에게 신고하는 양식입니다. 추후 자격과정 관련 문의 시 어떤 분에게 수업을 받았는지 확인하기 위해 사용됩니다.</p>
 
   <div class="notice">
-    <b>안내</b> · 이 페이지는 응답을 자동으로 저장하지 않습니다. 아래 내용을 작성하신 뒤 <b>[내용 복사]</b> 버튼으로 복사하여 운영진 연락처로 전송해 주세요. 강의안 파일은 별도로 첨부해 함께 보내주시면 됩니다.
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    <span><b>안내</b> · 이 페이지는 응답을 자동으로 저장하지 않습니다. 아래 내용을 작성하신 뒤 <b>[내용 복사]</b> 버튼으로 복사하여 운영진 연락처로 전송해 주세요. 첨부하신 PDF 강의안도 함께 보내주셔야 합니다.</span>
   </div>
 
   <div class="card">
@@ -124,11 +171,25 @@
         </div>
       </div>
     </div>
+
     <div class="field">
-      <label>강의안 전달 방법</label>
-      <input type="text" id="f-materials" placeholder="예: 이메일로 별도 첨부 예정" />
-      <p class="hint">강의안 파일 자체는 이 페이지가 아닌 문자/카카오톡/이메일로 함께 보내주세요.</p>
+      <label>강의안 파일</label>
+      <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="PDF 강의안 선택">
+        <i class="ti ti-file-upload" aria-hidden="true"></i>
+        <p class="upload-text"><span class="upload-strong">클릭하여 PDF 선택</span> 또는 파일을 끌어다 놓으세요</p>
+        <p class="upload-sub">PDF 파일만 가능 · 최대 20MB</p>
+      </div>
+      <input type="file" id="f-file" accept="application/pdf,.pdf" hidden />
+      <div class="file-chip" id="file-chip">
+        <i class="ti ti-file-type-pdf" aria-hidden="true"></i>
+        <span class="file-chip-name" id="file-chip-name"></span>
+        <span class="file-chip-size" id="file-chip-size"></span>
+        <button type="button" class="file-chip-remove" id="file-chip-remove" aria-label="파일 제거"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <p class="field-err" id="file-err">PDF 파일만 첨부할 수 있어요. 20MB 이하로 올려주세요.</p>
+      <p class="hint">이 페이지는 서버가 없어 파일이 자동으로 전송되지 않습니다. 아래에서 내용을 정리한 뒤, 이 PDF를 문자·카카오톡·이메일에 함께 첨부해 보내주세요.</p>
     </div>
+
     <div class="field">
       <label>비고</label>
       <textarea id="f-note" placeholder="전달할 추가 사항이 있으면 적어주세요"></textarea>
@@ -139,7 +200,7 @@
 
     <div class="result" id="result" style="display:none;">
       <div class="result-card">
-        <p class="result-title">아래 내용을 복사해서 운영진에게 보내주세요</p>
+        <p class="result-title"><i class="ti ti-clipboard-text" aria-hidden="true"></i>아래 내용을 복사해서 운영진에게 보내주세요</p>
         <pre class="summary" id="summary-text"></pre>
         <div class="actions">
           <button id="copy-btn"><i class="ti ti-copy" aria-hidden="true"></i> 내용 복사</button>
@@ -161,12 +222,67 @@
   var copyBtn = document.getElementById('copy-btn');
   var downloadBtn = document.getElementById('download-btn');
 
+  var uploadZone = document.getElementById('upload-zone');
+  var fileInput = document.getElementById('f-file');
+  var fileChip = document.getElementById('file-chip');
+  var fileChipName = document.getElementById('file-chip-name');
+  var fileChipSize = document.getElementById('file-chip-size');
+  var fileChipRemove = document.getElementById('file-chip-remove');
+  var fileErr = document.getElementById('file-err');
+  var selectedFile = null;
+
   function val(id) { return document.getElementById(id).value.trim(); }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  }
+
+  function setFile(file) {
+    if (!file) return;
+    var isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    var tooBig = file.size > 20 * 1024 * 1024;
+    if (!isPdf || tooBig) {
+      fileErr.textContent = tooBig ? '파일이 너무 커요. 20MB 이하로 올려주세요.' : 'PDF 파일만 첨부할 수 있어요.';
+      fileErr.style.display = 'block';
+      return;
+    }
+    fileErr.style.display = 'none';
+    selectedFile = file;
+    fileChipName.textContent = file.name;
+    fileChipSize.textContent = formatSize(file.size);
+    fileChip.style.display = 'flex';
+    uploadZone.style.display = 'none';
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    fileChip.style.display = 'none';
+    uploadZone.style.display = 'flex';
+  }
+
+  uploadZone.addEventListener('click', function () { fileInput.click(); });
+  uploadZone.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener('change', function (e) { setFile(e.target.files[0]); });
+  fileChipRemove.addEventListener('click', function (e) { e.stopPropagation(); clearFile(); });
+
+  ['dragover', 'dragenter'].forEach(function (evt) {
+    uploadZone.addEventListener(evt, function (e) { e.preventDefault(); uploadZone.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    uploadZone.addEventListener(evt, function (e) { e.preventDefault(); uploadZone.classList.remove('drag'); });
+  });
+  uploadZone.addEventListener('drop', function (e) {
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
 
   function buildSummary() {
     var name = val('f-name'), phone = val('f-phone'), date = val('f-date'),
-        headcount = val('f-headcount'), fee = val('f-fee'),
-        materials = val('f-materials') || '(미기재)', note = val('f-note') || '(없음)';
+        headcount = val('f-headcount'), fee = val('f-fee'), note = val('f-note') || '(없음)';
 
     if (!name || !phone || !date || !headcount || !fee) {
       errMsg.style.display = 'block';
@@ -178,6 +294,9 @@
     var feeNum = Number(fee);
     var headcountNum = Number(headcount);
     var feeFmt = isNaN(feeNum) ? fee : feeNum.toLocaleString('ko-KR');
+    var fileLine = selectedFile
+      ? selectedFile.name + ' (PDF, ' + formatSize(selectedFile.size) + ') — 메시지에 파일 함께 첨부'
+      : '(미첨부)';
 
     var lines = [
       '[2급 자격과정 운영 신고]',
@@ -186,7 +305,7 @@
       '교육 일시 : ' + date,
       '교육 인원 : ' + headcountNum + '명',
       '교육비(1인) : ' + feeFmt + '원',
-      '강의안 전달 : ' + materials,
+      '강의안 파일 : ' + fileLine,
       '비고 : ' + note
     ];
     summaryText.textContent = lines.join('\n');
