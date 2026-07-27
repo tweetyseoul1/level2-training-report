@@ -109,6 +109,10 @@
     cursor: pointer; font-family: inherit; box-shadow: var(--shadow-soft); transition: background .12s, transform .08s; }
   button.submit:hover { background: var(--accent-hover); }
   button.submit:active { transform: scale(0.99); }
+  button.submit:disabled { opacity: .6; cursor: default; }
+  button.submit i { margin-right: 2px; }
+  #result-title i.ti-loader-2 { animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .err { font-size: 12.5px; color: var(--danger-ink); margin-top: 10px; display: none; }
 
   .result { margin-top: 24px; }
@@ -139,7 +143,7 @@
 
   <div class="notice">
     <i class="ti ti-info-circle" aria-hidden="true"></i>
-    <span><b>안내</b> · 이 페이지는 응답을 자동으로 저장하지 않습니다. 아래 내용을 작성하신 뒤 <b>[내용 복사]</b> 버튼으로 복사하여 운영진 연락처로 전송해 주세요. 첨부하신 PDF 강의안도 함께 보내주셔야 합니다.</span>
+    <span><b>안내</b> · 제출 버튼을 누르면 구글시트에 자동으로 저장됩니다 (PDF 강의안 포함). 별도로 문자나 카카오톡을 보내실 필요는 없습니다.</span>
   </div>
 
   <div class="card">
@@ -195,18 +199,17 @@
       <textarea id="f-note" placeholder="전달할 추가 사항이 있으면 적어주세요"></textarea>
     </div>
 
-    <button class="submit" id="build-btn">내용 정리하기</button>
+    <button class="submit" id="build-btn"><i class="ti ti-send" aria-hidden="true"></i> 제출하기</button>
     <p class="err" id="err-msg">필수 항목(*)을 모두 입력해 주세요.</p>
 
     <div class="result" id="result" style="display:none;">
       <div class="result-card">
-        <p class="result-title"><i class="ti ti-clipboard-text" aria-hidden="true"></i>아래 내용을 복사해서 운영진에게 보내주세요</p>
+        <p class="result-title" id="result-title"><i class="ti ti-clipboard-text" aria-hidden="true"></i>제출 내용</p>
         <pre class="summary" id="summary-text"></pre>
         <div class="actions">
           <button id="copy-btn"><i class="ti ti-copy" aria-hidden="true"></i> 내용 복사</button>
           <button id="download-btn"><i class="ti ti-download" aria-hidden="true"></i> 파일로 저장</button>
         </div>
-        <p class="contact">전송 연락처 · <b>010-3005-3473</b></p>
       </div>
     </div>
   </div>
@@ -280,7 +283,32 @@
     if (e.dataTransfer.files && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
   });
 
-  function buildSummary() {
+  var WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz_hmmyAW38C_RhLvg_4WR_nq2a25UhAi0vjwrQe-6-LsAXdJlU05V66Zck2zb5I1SObQ/exec';
+  var resultTitle = document.getElementById('result-title');
+
+  function fileToBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result.split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function setResultState(state, text) {
+    if (state === 'loading') {
+      resultTitle.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i> ' + text;
+      resultTitle.style.color = 'var(--ink-soft)';
+    } else if (state === 'ok') {
+      resultTitle.innerHTML = '<i class="ti ti-circle-check" aria-hidden="true"></i> ' + text;
+      resultTitle.style.color = 'var(--accent-ink)';
+    } else {
+      resultTitle.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> ' + text;
+      resultTitle.style.color = 'var(--danger-ink)';
+    }
+  }
+
+  async function submitForm() {
     var name = val('f-name'), phone = val('f-phone'), date = val('f-date'),
         headcount = val('f-headcount'), fee = val('f-fee'), note = val('f-note') || '(없음)';
 
@@ -294,9 +322,7 @@
     var feeNum = Number(fee);
     var headcountNum = Number(headcount);
     var feeFmt = isNaN(feeNum) ? fee : feeNum.toLocaleString('ko-KR');
-    var fileLine = selectedFile
-      ? selectedFile.name + ' (PDF, ' + formatSize(selectedFile.size) + ') — 메시지에 파일 함께 첨부'
-      : '(미첨부)';
+    var fileLine = selectedFile ? selectedFile.name + ' (PDF, ' + formatSize(selectedFile.size) + ')' : '(미첨부)';
 
     var lines = [
       '[2급 자격과정 운영 신고]',
@@ -311,11 +337,32 @@
     summaryText.textContent = lines.join('\n');
     resultBox.style.display = 'block';
     resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    copyBtn.classList.remove('done');
-    copyBtn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> 내용 복사';
+
+    buildBtn.disabled = true;
+    setResultState('loading', '구글시트로 전송 중...');
+
+    try {
+      var payload = { name: name, phone: phone, date: date, headcount: headcountNum, fee: feeNum, note: note };
+      if (selectedFile) {
+        payload.fileName = selectedFile.name;
+        payload.fileMime = selectedFile.type || 'application/pdf';
+        payload.fileBase64 = await fileToBase64(selectedFile);
+      }
+      await fetch(WEBAPP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      setResultState('ok', '제출 완료! 구글시트에 저장되었습니다.');
+    } catch (err) {
+      setResultState('error', '전송에 실패했습니다. 아래 내용을 복사해서 010-3005-3473으로 직접 보내주세요.');
+    } finally {
+      buildBtn.disabled = false;
+    }
   }
 
-  buildBtn.addEventListener('click', buildSummary);
+  buildBtn.addEventListener('click', submitForm);
 
   copyBtn.addEventListener('click', function () {
     var text = summaryText.textContent;
