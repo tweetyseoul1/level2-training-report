@@ -166,9 +166,15 @@
       <label>우편주소<span class="req">*</span></label>
       <input type="text" id="f-address" placeholder="수료증/자격증을 받으실 주소" />
     </div>
-    <div class="field">
-      <label>입금자명<span class="req">*</span></label>
-      <input type="text" id="f-payer" placeholder="입금하신 분 성함" />
+    <div class="row2">
+      <div class="field">
+        <label>입금자명<span class="req">*</span></label>
+        <input type="text" id="f-payer" placeholder="입금하신 분 성함" />
+      </div>
+      <div class="field">
+        <label>입금일자<span class="req">*</span></label>
+        <input type="date" id="f-payment-date" />
+      </div>
     </div>
     <div class="field">
       <label>비고</label>
@@ -286,9 +292,9 @@
   async function submitForm() {
     var teacher = currentTeacherName(), applicant = val('f-applicant'), birth = val('f-birth'),
         phone = val('f-applicant-phone'), email = val('f-email'), address = val('f-address'),
-        payer = val('f-payer'), note = val('f-note') || '(없음)';
+        payer = val('f-payer'), paymentDate = val('f-payment-date'), note = val('f-note') || '(없음)';
 
-    if (!teacher || !applicant || !birth || !phone || !email || !address || !payer) {
+    if (!teacher || !applicant || !birth || !phone || !email || !address || !payer || !paymentDate) {
       errMsg.style.display = 'block'; resultBox.style.display = 'none'; return;
     }
     errMsg.style.display = 'none';
@@ -296,7 +302,7 @@
     var lines = [
       '[' + currentLabel + ' 신청]', '담당 강사 : ' + teacher, '신청자 성명 : ' + applicant,
       '생년월일 : ' + birth, '연락처 : ' + phone, '이메일 : ' + email, '우편주소 : ' + address,
-      '입금자명 : ' + payer, '비고 : ' + note
+      '입금자명 : ' + payer, '입금일자 : ' + paymentDate, '비고 : ' + note
     ];
     summaryText.textContent = lines.join('\n');
     resultBox.style.display = 'block';
@@ -308,7 +314,7 @@
       var payload = {
         formType: 'studentApplication', docType: currentType, docLabel: currentLabel, certName: currentName,
         teacherName: teacher, applicantName: applicant, birthdate: birth, applicantPhone: phone,
-        email: email, address: address, payerName: payer, note: note
+        email: email, address: address, payerName: payer, paymentDate: paymentDate, note: note
       };
       await fetch(WEBAPP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       setResultState('ok', '신청 완료!');
