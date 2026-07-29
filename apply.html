@@ -49,6 +49,9 @@
   .account-number { font-family: var(--font-mono); font-weight: 600; letter-spacing: .02em; }
   .account-holder { color: var(--ink-soft); margin-left: 4px; font-size: 13.5px; }
   .account-empty { color: var(--ink-faint); font-size: 13.5px; }
+  .teacher-locked { display: flex; align-items: center; gap: 8px; padding: 11px 12px; background: var(--accent-bg);
+    border-radius: 8px; font-size: 14.5px; font-weight: 600; color: var(--accent-ink); }
+  .teacher-locked i { font-size: 16px; }
   .account-copy { flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: 8px;
     border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); font-size: 13px; font-weight: 500;
     cursor: pointer; font-family: inherit; transition: border-color .12s; }
@@ -122,11 +125,15 @@
       </div>
     </div>
 
-    <div class="field">
+    <div class="field" id="teacher-field">
       <label>담당 강사<span class="req">*</span></label>
       <select id="f-teacher">
         <option value="">강사님을 선택해주세요</option>
       </select>
+    </div>
+    <div class="field" id="teacher-locked-field" style="display:none;">
+      <label>담당 강사</label>
+      <div class="teacher-locked"><i class="ti ti-user-check" aria-hidden="true"></i><span id="teacher-locked-name"></span></div>
     </div>
 
     <div class="account-card">
@@ -202,21 +209,11 @@
   var accountCopyBtn = document.getElementById('account-copy-btn');
   var instructors = [];
 
-  fetch(WEBAPP_URL + '?action=instructors')
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      instructors = (data && data.instructors) || [];
-      instructors.forEach(function (t) {
-        var opt = document.createElement('option');
-        opt.value = t.name;
-        opt.textContent = t.name;
-        teacherSelect.appendChild(opt);
-      });
-    })
-    .catch(function () {});
+  var lockedTeacherName = new URLSearchParams(window.location.search).get('teacher') || '';
+  function currentTeacherName() { return lockedTeacherName || teacherSelect.value; }
 
-  teacherSelect.addEventListener('change', function () {
-    var t = instructors.filter(function (x) { return x.name === teacherSelect.value; })[0];
+  function showAccountFor(name) {
+    var t = instructors.filter(function (x) { return x.name === name; })[0];
     if (!t || !t.account) {
       accountDisplay.innerHTML = '<span class="account-empty">등록된 계좌 정보가 없습니다. 강사님께 직접 문의해주세요.</span>';
       accountCopyBtn.disabled = true;
@@ -226,10 +223,35 @@
       '<span class="account-number">' + t.account + '</span>' +
       '<span class="account-holder">(' + (t.holder || t.name) + ')</span>';
     accountCopyBtn.disabled = false;
-  });
+  }
+
+  if (lockedTeacherName) {
+    document.getElementById('teacher-field').style.display = 'none';
+    document.getElementById('teacher-locked-field').style.display = 'block';
+    document.getElementById('teacher-locked-name').textContent = lockedTeacherName;
+  }
+
+  fetch(WEBAPP_URL + '?action=instructors')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      instructors = (data && data.instructors) || [];
+      if (lockedTeacherName) {
+        showAccountFor(lockedTeacherName);
+      } else {
+        instructors.forEach(function (t) {
+          var opt = document.createElement('option');
+          opt.value = t.name;
+          opt.textContent = t.name;
+          teacherSelect.appendChild(opt);
+        });
+      }
+    })
+    .catch(function () {});
+
+  teacherSelect.addEventListener('change', function () { showAccountFor(teacherSelect.value); });
 
   accountCopyBtn.addEventListener('click', function () {
-    var t = instructors.filter(function (x) { return x.name === teacherSelect.value; })[0];
+    var t = instructors.filter(function (x) { return x.name === currentTeacherName(); })[0];
     if (!t) return;
     function marked() {
       accountCopyBtn.classList.add('done');
@@ -262,7 +284,7 @@
   }
 
   async function submitForm() {
-    var teacher = teacherSelect.value, applicant = val('f-applicant'), birth = val('f-birth'),
+    var teacher = currentTeacherName(), applicant = val('f-applicant'), birth = val('f-birth'),
         phone = val('f-applicant-phone'), email = val('f-email'), address = val('f-address'),
         payer = val('f-payer'), note = val('f-note') || '(없음)';
 

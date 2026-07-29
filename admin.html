@@ -116,7 +116,7 @@
     <div class="instructor-list">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>강사명</th><th>은행</th><th>계좌번호</th><th>예금주</th><th></th></tr></thead>
+          <thead><tr><th>강사명</th><th>은행</th><th>계좌번호</th><th>예금주</th><th>수강생 신청 링크</th><th></th></tr></thead>
           <tbody id="instructor-table-body"></tbody>
         </table>
       </div>
@@ -147,11 +147,20 @@
 
 <script>
   var WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxxrpIbAuO2mGIKrgakBOgExkeNhEKo3V601xnOcFlDU3cdjP2Y_Pd6MTXgIFe8Dcfz/exec';
+  var APPLY_BASE_URL = 'https://tweetyseoul1.github.io/level2-training-report/apply.html';
   var currentPw = sessionStorage.getItem('admin_pw') || '';
   var allStudents = [];
   var allInstructors = [];
 
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  function fallbackCopyLink(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
 
   function loadAdminData(pw) {
     return fetch(WEBAPP_URL + '?action=admin&pw=' + encodeURIComponent(pw))
@@ -168,9 +177,11 @@
     var tbody = document.getElementById('instructor-table-body');
     tbody.innerHTML = '';
     allInstructors.forEach(function (t) {
+      var link = APPLY_BASE_URL + '?teacher=' + encodeURIComponent(t.name);
       var tr = document.createElement('tr');
       tr.innerHTML = '<td>' + esc(t.name) + '</td><td>' + esc(t.bank) + '</td><td>' + esc(t.account) + '</td><td>' + esc(t.holder) +
-        '</td><td><button class="btn" style="padding:5px 10px;font-size:12px;" data-edit="' + esc(t.name) + '">수정</button></td>';
+        '</td><td><button class="btn" style="padding:5px 10px;font-size:12px;" data-copy-link="' + esc(t.name) + '"><i class="ti ti-link" aria-hidden="true"></i> 링크 복사</button></td>' +
+        '<td><button class="btn" style="padding:5px 10px;font-size:12px;" data-edit="' + esc(t.name) + '">수정</button></td>';
       tbody.appendChild(tr);
     });
     tbody.querySelectorAll('[data-edit]').forEach(function (btn) {
@@ -182,6 +193,20 @@
         document.getElementById('acc-number').value = t.account;
         document.getElementById('acc-holder').value = t.holder;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+    tbody.querySelectorAll('[data-copy-link]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var name = btn.getAttribute('data-copy-link');
+        var link = APPLY_BASE_URL + '?teacher=' + encodeURIComponent(name);
+        function marked() {
+          var orig = btn.innerHTML;
+          btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> 복사됨';
+          setTimeout(function () { btn.innerHTML = orig; }, 1800);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(link).then(marked, function () { fallbackCopyLink(link, marked); });
+        } else { fallbackCopyLink(link, marked); }
       });
     });
 
