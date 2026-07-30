@@ -206,9 +206,17 @@
             btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> 복사됨';
             setTimeout(function () { btn.innerHTML = orig; }, 1800);
           }
+          function showLinkPrompt() {
+            window.prompt('아래 링크를 선택해서 복사하세요 (Ctrl+C):', link);
+          }
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(marked, function () { fallbackCopyLink(link, marked); });
-          } else { fallbackCopyLink(link, marked); }
+            navigator.clipboard.writeText(link).then(marked, showLinkPrompt);
+          } else {
+            fallbackCopyLink(link, function () {
+              marked();
+              showLinkPrompt();
+            });
+          }
         });
       });
     }
@@ -245,7 +253,12 @@
   document.getElementById('filter-teacher').addEventListener('change', renderStudents);
 
   document.getElementById('refresh-btn').addEventListener('click', function () {
-    loadAdminData(currentPw).then(function () { renderInstructors(); renderStudents(); });
+    var btn = this;
+    var orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '불러오는 중...';
+    loadAdminData(currentPw).then(function () { renderInstructors(); renderStudents(); })
+      .catch(function () { alert('불러오기에 실패했습니다. 잠시 후 다시 시도해주세요.'); })
+      .then(function () { btn.disabled = false; btn.innerHTML = orig; });
   });
 
   document.getElementById('acc-save').addEventListener('click', function () {
@@ -256,6 +269,9 @@
     var okMsg = document.getElementById('acc-msg-ok'), errMsg = document.getElementById('acc-msg-err');
     okMsg.style.display = 'none'; errMsg.style.display = 'none';
     if (!name || !bank || !account || !holder) { errMsg.textContent = '모든 항목을 입력해주세요.'; errMsg.style.display = 'block'; return; }
+    var saveBtn = document.getElementById('acc-save');
+    var origBtn = saveBtn.innerHTML;
+    saveBtn.disabled = true; saveBtn.innerHTML = '저장 중...';
     fetch(WEBAPP_URL, {
       method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ formType: 'setInstructorAccount', pw: currentPw, teacherName: name, bank: bank, account: account, holder: holder })
@@ -265,12 +281,16 @@
       document.getElementById('acc-number').value = ''; document.getElementById('acc-holder').value = '';
       return loadAdminData(currentPw);
     }).then(function () { renderInstructors(); renderStudents(); })
-      .catch(function () { errMsg.style.display = 'block'; });
+      .catch(function () { errMsg.style.display = 'block'; })
+      .then(function () { saveBtn.disabled = false; saveBtn.innerHTML = origBtn; });
   });
 
   function tryLogin(pw) {
     var errEl = document.getElementById('pw-err');
     errEl.style.display = 'none';
+    var btn = document.getElementById('pw-submit');
+    var orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '확인 중...';
     loadAdminData(pw).then(function () {
       currentPw = pw;
       sessionStorage.setItem('admin_pw', pw);
@@ -279,7 +299,7 @@
       renderInstructors(); renderStudents();
     }).catch(function () {
       errEl.style.display = 'block';
-    });
+    }).then(function () { btn.disabled = false; btn.innerHTML = orig; });
   }
 
   document.getElementById('pw-submit').addEventListener('click', function () {
