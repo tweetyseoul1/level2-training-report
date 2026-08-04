@@ -51,6 +51,7 @@ function doPost(e) {
     if (action === 'login') return jsonOutput(actionLogin(data.id, data.pw));
     if (action === 'logout') return jsonOutput(actionLogout(data.token));
     if (action === 'studentApplication') return jsonOutput(actionStudentApplication(data));
+    if (action === 'registerInstructor') return jsonOutput(actionRegisterInstructor(data));
 
     // 아래는 모두 로그인 세션이 필요
     var session = requireSession(data.token);
@@ -310,6 +311,22 @@ function actionAdminCreateInstructor(data) {
     true, new Date()
   ]);
   return { ok: true };
+}
+
+// 강사 본인이 직접 아이디/비밀번호를 정해 가입 (관리자 승인 없이 즉시 사용 가능, 비밀번호는 본인만 앎)
+function actionRegisterInstructor(data) {
+  if (!data.id || !data.pw || !data.name) return { ok: false, error: '아이디, 비밀번호, 이름을 입력해주세요.' };
+  if (String(data.pw).length < 4) return { ok: false, error: '비밀번호는 4자 이상으로 설정해주세요.' };
+  if (findUserById_(data.id)) return { ok: false, error: '이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.' };
+  var salt = Utilities.getUuid();
+  getUsersSheet_().appendRow([
+    data.id, hashPassword_(data.pw, salt), salt, 'instructor', data.name || '',
+    data.phone || '', data.email || '', data.bank || '', data.account || '', data.holder || '',
+    true, new Date()
+  ]);
+  var msg = '[강사 등록]\n이름: ' + data.name + '\n아이디: ' + data.id + (data.phone ? ('\n연락처: ' + data.phone) : '');
+  var kakaoResult = sendKakaoToMe(msg);
+  return { ok: true, kakao: kakaoResult };
 }
 
 function actionUpdateMyAccount(session, data) {

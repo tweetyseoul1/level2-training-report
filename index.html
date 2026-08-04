@@ -98,6 +98,7 @@
     <div class="toggle-group">
       <button class="active" id="mode-staff">원장님 / 강사 로그인</button>
       <button id="mode-student">수강생 신청 · 조회</button>
+      <button id="mode-register">강사 등록(신규)</button>
     </div>
 
     <div class="card" id="staff-login-card">
@@ -105,6 +106,26 @@
       <div class="field"><label>아이디</label><input id="login-id" placeholder="아이디" /></div>
       <div class="field"><label>비밀번호</label><input id="login-pw" type="password" placeholder="비밀번호" /></div>
       <button class="btn" id="login-btn" style="width:100%;">로그인</button>
+    </div>
+
+    <div class="card" id="register-card" style="display:none;">
+      <div class="msg" id="register-msg"></div>
+      <p class="hint">아이디와 비밀번호는 본인만 알 수 있으며, 원장님을 포함해 다른 사람에게 공유되지 않습니다.</p>
+      <div class="row2">
+        <div class="field"><label>사용할 아이디<span style="color:var(--danger-ink)">*</span></label><input id="reg-id" /></div>
+        <div class="field"><label>사용할 비밀번호<span style="color:var(--danger-ink)">*</span></label><input id="reg-pw" type="password" /></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>이름<span style="color:var(--danger-ink)">*</span></label><input id="reg-name" /></div>
+        <div class="field"><label>연락처</label><input id="reg-phone" /></div>
+      </div>
+      <div class="field"><label>이메일</label><input id="reg-email" type="email" /></div>
+      <div class="row2">
+        <div class="field"><label>은행</label><input id="reg-bank" /></div>
+        <div class="field"><label>계좌번호</label><input id="reg-account" /></div>
+      </div>
+      <div class="field"><label>예금주</label><input id="reg-holder" /></div>
+      <button class="btn" id="register-btn" style="width:100%;">강사 등록하기</button>
     </div>
 
     <div class="card" id="student-entry-card" style="display:none;">
@@ -179,24 +200,8 @@
     </div>
 
     <div class="tab-panel" id="a-instructors" style="display:none;">
-      <h2>새 강사 등록</h2>
       <div class="card">
-        <div class="row2">
-          <div class="field"><label>로그인 아이디</label><input id="ai-id" /></div>
-          <div class="field"><label>임시 비밀번호</label><input id="ai-pw" /></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>이름</label><input id="ai-name" /></div>
-          <div class="field"><label>연락처</label><input id="ai-phone" /></div>
-        </div>
-        <div class="field"><label>이메일</label><input id="ai-email" type="email" /></div>
-        <div class="row2">
-          <div class="field"><label>은행</label><input id="ai-bank" /></div>
-          <div class="field"><label>계좌번호</label><input id="ai-account" /></div>
-        </div>
-        <div class="field"><label>예금주</label><input id="ai-holder" /></div>
-        <button class="btn" id="ai-create-btn" style="width:100%;">강사 등록</button>
-        <p class="hint">등록 후 아이디/임시 비밀번호를 강사님께 안내해주세요. 강사님은 계좌정보를 본인 화면에서 직접 수정할 수 있습니다.</p>
+        <p class="hint">강사님들은 원장님이 계정을 만들어드리는 대신, 로그인 화면의 "강사 등록(신규)"에서 본인이 직접 아이디/비밀번호를 정해 가입합니다. 비밀번호는 가입한 강사 본인만 알 수 있습니다. 신규 강사님께는 사이트 링크를 안내해주시고, "강사 등록(신규)" 탭에서 가입하도록 전달해주세요.</p>
       </div>
       <h2>등록된 강사</h2>
       <div class="table-wrap"><table id="a-instructors-table"><thead><tr>
@@ -365,17 +370,41 @@ function routeAfterLogin() {
 // 로그인 화면
 // ------------------------------------------------------------
 
-document.getElementById('mode-staff').addEventListener('click', function () {
-  document.getElementById('mode-staff').classList.add('active');
-  document.getElementById('mode-student').classList.remove('active');
-  document.getElementById('staff-login-card').style.display = 'block';
-  document.getElementById('student-entry-card').style.display = 'none';
-});
-document.getElementById('mode-student').addEventListener('click', function () {
-  document.getElementById('mode-student').classList.add('active');
-  document.getElementById('mode-staff').classList.remove('active');
-  document.getElementById('staff-login-card').style.display = 'none';
-  document.getElementById('student-entry-card').style.display = 'block';
+function setLoginMode(mode) {
+  document.getElementById('mode-staff').classList.toggle('active', mode === 'staff');
+  document.getElementById('mode-student').classList.toggle('active', mode === 'student');
+  document.getElementById('mode-register').classList.toggle('active', mode === 'register');
+  document.getElementById('staff-login-card').style.display = mode === 'staff' ? 'block' : 'none';
+  document.getElementById('student-entry-card').style.display = mode === 'student' ? 'block' : 'none';
+  document.getElementById('register-card').style.display = mode === 'register' ? 'block' : 'none';
+}
+document.getElementById('mode-staff').addEventListener('click', function () { setLoginMode('staff'); });
+document.getElementById('mode-student').addEventListener('click', function () { setLoginMode('student'); });
+document.getElementById('mode-register').addEventListener('click', function () { setLoginMode('register'); });
+
+document.getElementById('register-btn').addEventListener('click', function () {
+  clearMsg('register-msg');
+  var id = document.getElementById('reg-id').value.trim();
+  var pw = document.getElementById('reg-pw').value;
+  var name = document.getElementById('reg-name').value.trim();
+  if (!id || !pw || !name) { setMsg('register-msg', 'error', '아이디, 비밀번호, 이름은 필수입니다.'); return; }
+  apiPost('registerInstructor', {
+    id: id, pw: pw, name: name,
+    phone: document.getElementById('reg-phone').value.trim(),
+    email: document.getElementById('reg-email').value.trim(),
+    bank: document.getElementById('reg-bank').value.trim(),
+    account: document.getElementById('reg-account').value.trim(),
+    holder: document.getElementById('reg-holder').value.trim()
+  }).then(function (res) {
+    if (!res.ok) { setMsg('register-msg', 'error', res.error || '등록에 실패했습니다.'); return; }
+    setMsg('register-msg', 'success', '등록이 완료되었습니다. 방금 만든 아이디/비밀번호로 로그인해주세요.');
+    ['reg-id', 'reg-pw', 'reg-name', 'reg-phone', 'reg-email', 'reg-bank', 'reg-account', 'reg-holder'].forEach(function (id) {
+      document.getElementById(id).value = '';
+    });
+    setTimeout(function () { setLoginMode('staff'); }, 1500);
+  }).catch(function () {
+    setMsg('register-msg', 'error', '서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+  });
 });
 
 document.getElementById('login-btn').addEventListener('click', function () {
@@ -616,23 +645,6 @@ document.getElementById('ac-create-btn').addEventListener('click', function () {
     document.getElementById('ac-fee').value = '';
     document.getElementById('ac-capacity').value = '';
     refreshAdminCourses();
-  });
-});
-
-document.getElementById('ai-create-btn').addEventListener('click', function () {
-  apiPost('createInstructor', {
-    id: document.getElementById('ai-id').value.trim(),
-    pw: document.getElementById('ai-pw').value,
-    name: document.getElementById('ai-name').value.trim(),
-    phone: document.getElementById('ai-phone').value.trim(),
-    email: document.getElementById('ai-email').value.trim(),
-    bank: document.getElementById('ai-bank').value.trim(),
-    account: document.getElementById('ai-account').value.trim(),
-    holder: document.getElementById('ai-holder').value.trim()
-  }).then(function (res) {
-    if (!res.ok) { alert(res.error || '등록 실패'); return; }
-    ['ai-id', 'ai-pw', 'ai-name', 'ai-phone', 'ai-email', 'ai-bank', 'ai-account', 'ai-holder'].forEach(function (id) { document.getElementById(id).value = ''; });
-    loadAdmin();
   });
 });
 
