@@ -140,7 +140,7 @@ function hashPassword_(password, salt) {
 function findUserById_(id) {
   var rows = sheetRowsAsObjects_(getUsersSheet_());
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i]['아이디'] === id) return rows[i];
+    if (String(rows[i]['아이디']) === String(id)) return rows[i];
   }
   return null;
 }
@@ -202,7 +202,12 @@ function actionMe(token) {
 // ------------------------------------------------------------
 
 function generateCourseCode_() {
-  return Utilities.getUuid().replace(/-/g, '').substring(0, 6).toUpperCase();
+  // 전부 숫자로만 된 코드는 시트에 숫자형으로 저장되어 조회 시 혼동을 줄 수 있으므로 문자가 하나 이상 섞인 코드만 사용한다.
+  for (var i = 0; i < 20; i++) {
+    var code = Utilities.getUuid().replace(/-/g, '').substring(0, 6).toUpperCase();
+    if (/[A-F]/.test(code)) return code;
+  }
+  return 'A' + Utilities.getUuid().replace(/-/g, '').substring(0, 5).toUpperCase();
 }
 
 function findCourseById_(courseId) {
@@ -215,8 +220,9 @@ function findCourseById_(courseId) {
 
 function findCourseByCode_(code) {
   var rows = sheetRowsAsObjects_(getCoursesSheet_());
+  // 신청코드가 전부 숫자인 경우 시트가 자동으로 숫자형으로 저장하므로 문자열로 맞춰 비교한다.
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i]['신청코드'] === code) return rows[i];
+    if (String(rows[i]['신청코드']) === String(code)) return rows[i];
   }
   return null;
 }
