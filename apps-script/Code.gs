@@ -15,7 +15,7 @@ var SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12시간
 function doGet(e) {
   var p = e.parameter;
 
-  if (p.code) {
+  if (p.code && !p.action) {
     return handleKakaoOAuthCallback(p.code);
   }
   if (p.diag === '1') {
@@ -23,7 +23,7 @@ function doGet(e) {
   }
 
   if (p.action === 'me') return jsonOutput(actionMe(p.token));
-  if (p.action === 'getCourseByCode') return jsonOutput(actionGetCourseByCode(p.code));
+  if (p.action === 'getCourseByCode') return jsonOutput(actionGetCourseByCode(p.courseCode));
   if (p.action === 'studentLookup') return jsonOutput(actionStudentLookup(p.phone, p.birth));
 
   var session = requireSession(p.token);
