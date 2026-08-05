@@ -48,6 +48,7 @@
   button.btn.secondary { background: transparent; color: var(--accent-ink); border: 1px solid var(--line-strong); }
   button.btn.small { padding: 6px 10px; font-size: 12.5px; }
   button.btn.danger { background: var(--danger-ink); }
+  button.btn:disabled { background: var(--line-strong); color: var(--ink-faint); cursor: not-allowed; }
   .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
   .tab { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--line-strong); background: var(--card);
     font-size: 13px; font-weight: 600; color: var(--ink-soft); }
@@ -94,9 +95,9 @@
   <!-- ===================== 로그인 화면 ===================== -->
   <div class="screen active" id="screen-login">
     <h1>2급 자격과정 운영 프로그램</h1>
-    <p class="lead">한국영유아AI교육진흥협회 · 원장님/강사 로그인 또는 수강생 신청</p>
+    <p class="lead">한국영유아AI교육진흥협회 · 협회 운영진/강사 로그인 또는 수강생 신청</p>
     <div class="toggle-group">
-      <button class="active" id="mode-staff">원장님 / 강사 로그인</button>
+      <button class="active" id="mode-staff">협회 운영진 / 강사 로그인</button>
       <button id="mode-student">수강생 신청 · 조회</button>
       <button id="mode-register">강사 등록(신규)</button>
     </div>
@@ -110,7 +111,7 @@
 
     <div class="card" id="register-card" style="display:none;">
       <div class="msg" id="register-msg"></div>
-      <p class="hint">아이디와 비밀번호는 본인만 알 수 있으며, 원장님을 포함해 다른 사람에게 공유되지 않습니다.</p>
+      <p class="hint">아이디와 비밀번호는 본인만 알 수 있으며, 협회 운영진을 포함해 다른 사람에게 공유되지 않습니다.</p>
       <div class="row2">
         <div class="field"><label>사용할 아이디<span style="color:var(--danger-ink)">*</span></label><input id="reg-id" /></div>
         <div class="field"><label>사용할 비밀번호<span style="color:var(--danger-ink)">*</span></label><input id="reg-pw" type="password" /></div>
@@ -131,8 +132,8 @@
     <div class="card" id="student-entry-card" style="display:none;">
       <div class="msg" id="student-entry-msg"></div>
       <div class="field"><label>과정 코드<span style="color:var(--danger-ink)">*</span></label>
-        <input id="course-code-input" placeholder="원장님/강사님께 받은 6자리 코드" />
-        <p class="hint">과정 코드는 담당 강사님/원장님이 안내한 링크나 코드로 확인할 수 있습니다.</p>
+        <input id="course-code-input" placeholder="협회 운영진/강사님께 받은 6자리 코드" />
+        <p class="hint">과정 코드는 담당 강사님/협회 운영진이 안내한 링크나 코드로 확인할 수 있습니다.</p>
       </div>
       <button class="btn" id="course-code-btn" style="width:100%;">확인</button>
       <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;" />
@@ -172,7 +173,7 @@
     <button class="btn secondary" id="student-back-btn">처음으로</button>
   </div>
 
-  <!-- ===================== 원장님 화면 ===================== -->
+  <!-- ===================== 협회 운영진 화면 ===================== -->
   <div class="screen" id="screen-admin">
     <div class="tabs">
       <button class="tab active" data-tab="a-courses">과정 관리</button>
@@ -201,7 +202,7 @@
 
     <div class="tab-panel" id="a-instructors" style="display:none;">
       <div class="card">
-        <p class="hint">강사님들은 원장님이 계정을 만들어드리는 대신, 로그인 화면의 "강사 등록(신규)"에서 본인이 직접 아이디/비밀번호를 정해 가입합니다. 비밀번호는 가입한 강사 본인만 알 수 있습니다. 신규 강사님께는 사이트 링크를 안내해주시고, "강사 등록(신규)" 탭에서 가입하도록 전달해주세요.</p>
+        <p class="hint">강사님들은 협회 운영진이 계정을 만들어드리는 대신, 로그인 화면의 "강사 등록(신규)"에서 본인이 직접 아이디/비밀번호를 정해 가입합니다. 비밀번호는 가입한 강사 본인만 알 수 있습니다. 신규 강사님께는 사이트 링크를 안내해주시고, "강사 등록(신규)" 탭에서 가입하도록 전달해주세요.</p>
       </div>
       <h2>등록된 강사</h2>
       <div class="table-wrap"><table id="a-instructors-table"><thead><tr>
@@ -226,25 +227,32 @@
 
   <!-- ===================== 강사 화면 ===================== -->
   <div class="screen" id="screen-instructor">
+    <div class="card" id="i-no-course-notice" style="display:none;">
+      <p class="lead">아직 협회 운영진이 배정한 과정이 없습니다.<br/>협회 운영진께 과정 등록을 요청해주세요.</p>
+      <button class="btn secondary" id="i-refresh-btn">새로고침</button>
+    </div>
+
+    <div class="card" id="i-course-picker" style="display:none;">
+      <p class="hint" style="margin-bottom:10px;">① 먼저 진행할 과정을 확인하세요. 아래 신고서 제출 · 수강생 확인 · 수료증 신청은 모두 이 과정 기준으로 진행됩니다.</p>
+      <div class="field" id="i-course-select-wrap" style="display:none;">
+        <label>진행할 과정 선택</label>
+        <select id="i-course-select"></select>
+      </div>
+      <div class="readonly-box" id="i-course-info"></div>
+      <button class="btn secondary small" id="i-course-link-btn">학생용 링크 복사</button>
+    </div>
+
     <div class="tabs">
-      <button class="tab active" data-tab="i-courses">내 과정</button>
-      <button class="tab" data-tab="i-report">운영 신고서 제출</button>
-      <button class="tab" data-tab="i-students">내 수강생</button>
-      <button class="tab" data-tab="i-certificate">수료증 일괄신청</button>
+      <button class="tab active" data-tab="i-report">② 운영 신고서 제출</button>
+      <button class="tab" data-tab="i-students">③ 내 수강생 확인</button>
+      <button class="tab" data-tab="i-certificate">④ 수료증 일괄신청</button>
       <button class="tab" data-tab="i-account">계좌정보</button>
     </div>
 
-    <div class="tab-panel" id="i-courses">
-      <p class="lead">원장님이 배정한 과정만 표시됩니다. 강사명은 로그인 계정에 고정되어 학생 화면에 그대로 노출됩니다.</p>
-      <div class="table-wrap"><table id="i-courses-table"><thead><tr>
-        <th>과정명</th><th>일시</th><th>교육비</th><th>상태</th><th>학생용 링크</th>
-      </tr></thead><tbody></tbody></table></div>
-    </div>
-
-    <div class="tab-panel" id="i-report" style="display:none;">
+    <div class="tab-panel" id="i-report">
       <div class="msg" id="i-report-msg"></div>
+      <p class="hint" id="i-report-noselect-hint" style="display:none;">위에서 과정이 배정되면 신고서를 제출할 수 있습니다.</p>
       <div class="card">
-        <div class="field"><label>과정 선택</label><select id="ir-course"></select></div>
         <div class="row2">
           <div class="field"><label>교육 일시</label><input id="ir-date" placeholder="예: 2026.08.09 10:00~17:00" /></div>
           <div class="field"><label>교육 인원</label><input id="ir-headcount" type="number" /></div>
@@ -313,7 +321,9 @@ var state = {
   role: localStorage.getItem('role') || '',
   name: localStorage.getItem('name') || '',
   id: localStorage.getItem('id') || '',
-  course: null
+  course: null,
+  instructorCourses: [],
+  selectedCourseId: ''
 };
 
 function apiGet(action, params) {
@@ -360,7 +370,7 @@ function clearSession() {
 
 function routeAfterLogin() {
   document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('who-name').textContent = state.name + ' (' + (state.role === 'admin' ? '원장님' : '강사') + ')';
+  document.getElementById('who-name').textContent = state.name + ' (' + (state.role === 'admin' ? '관리자' : '강사') + ')';
   if (state.role === 'admin') { showScreen('screen-admin'); loadAdmin(); }
   else if (state.role === 'instructor') { showScreen('screen-instructor'); loadInstructor(); }
   else { showScreen('screen-login'); }
@@ -521,7 +531,7 @@ function fmtDate(v) { if (!v) return ''; try { return new Date(v).toLocaleString
 function studentUrl(code) { return location.origin + location.pathname + '?course=' + code; }
 
 // ------------------------------------------------------------
-// 원장님 화면
+// 협회 운영진 화면
 // ------------------------------------------------------------
 
 document.querySelectorAll('#screen-admin .tab').forEach(function (btn) {
@@ -655,19 +665,12 @@ document.getElementById('ac-create-btn').addEventListener('click', function () {
 function loadInstructor() {
   apiGet('myCourses', { token: state.token }).then(function (res) {
     if (!res.ok) return;
-    var tbody = document.querySelector('#i-courses-table tbody');
-    tbody.innerHTML = '';
-    var sel = document.getElementById('ir-course');
-    sel.innerHTML = '<option value="">과정 선택</option>';
-    res.courses.forEach(function (c) {
-      var url = studentUrl(c['신청코드']);
-      tbody.innerHTML += '<tr><td>' + esc(c['과정명']) + '</td><td>' + esc(c['교육일시']) + '</td><td>' + esc(c['교육비']) +
-        '</td><td>' + esc(c['상태']) + '</td><td><code class="copy">' + esc(c['신청코드']) + '</code> <button class="btn secondary small copy-link-btn" data-url="' + esc(url) + '">링크 복사</button></td></tr>';
-      sel.innerHTML += '<option value="' + esc(c['과정ID']) + '">' + esc(c['과정명']) + '</option>';
-    });
-    document.querySelectorAll('.copy-link-btn').forEach(function (b) {
-      b.addEventListener('click', function () { copyText(b.dataset.url); });
-    });
+    state.instructorCourses = res.courses || [];
+    if (!state.instructorCourses.some(function (c) { return c['과정ID'] === state.selectedCourseId; })) {
+      state.selectedCourseId = state.instructorCourses.length ? state.instructorCourses[0]['과정ID'] : '';
+    }
+    renderCoursePicker();
+    renderMyStudentsTable();
   });
   apiGet('myReports', { token: state.token }).then(function (res) {
     if (!res.ok) return;
@@ -680,12 +683,8 @@ function loadInstructor() {
   });
   apiGet('myStudents', { token: state.token }).then(function (res) {
     if (!res.ok) return;
-    var tbody = document.querySelector('#i-students-table tbody');
-    tbody.innerHTML = '';
-    res.students.slice().reverse().forEach(function (s) {
-      tbody.innerHTML += '<tr><td>' + fmtDate(s['타임스탬프']) + '</td><td>' + esc(s['구분']) + '</td><td>' + esc(s['신청자 성명']) +
-        '</td><td>' + esc(s['연락처']) + '</td><td>' + esc(s['입금자명']) + '</td><td>' + esc(s['입금일자']) + '</td></tr>';
-    });
+    state.instructorStudents = res.students || [];
+    renderMyStudentsTable();
   });
   apiGet('me', { token: state.token }).then(function (res) {
     if (!res.ok) return;
@@ -696,10 +695,75 @@ function loadInstructor() {
   resetCertRows();
 }
 
+function getSelectedCourse() {
+  return state.instructorCourses.filter(function (c) { return c['과정ID'] === state.selectedCourseId; })[0] || null;
+}
+
+function renderCoursePicker() {
+  var courses = state.instructorCourses;
+  document.getElementById('i-no-course-notice').style.display = courses.length ? 'none' : 'block';
+  document.getElementById('i-course-picker').style.display = courses.length ? 'block' : 'none';
+  document.getElementById('i-report-noselect-hint').style.display = courses.length ? 'none' : 'block';
+  document.getElementById('ir-submit-btn').disabled = !courses.length;
+
+  var selectWrap = document.getElementById('i-course-select-wrap');
+  if (courses.length > 1) {
+    selectWrap.style.display = 'block';
+    var sel = document.getElementById('i-course-select');
+    sel.innerHTML = '';
+    courses.forEach(function (c) {
+      sel.innerHTML += '<option value="' + esc(c['과정ID']) + '"' + (c['과정ID'] === state.selectedCourseId ? ' selected' : '') + '>' + esc(c['과정명']) + '</option>';
+    });
+  } else {
+    selectWrap.style.display = 'none';
+  }
+
+  var course = getSelectedCourse();
+  var info = document.getElementById('i-course-info');
+  if (course) {
+    info.innerHTML = '<b>' + esc(course['과정명']) + '</b><br/>' +
+      (course['교육일시'] ? ('일시: ' + esc(course['교육일시']) + '<br/>') : '') +
+      (course['교육비'] ? ('교육비: ' + esc(course['교육비']) + '원<br/>') : '') +
+      '상태: ' + esc(course['상태']) + '<br/>' +
+      '과정 코드: <code class="copy">' + esc(course['신청코드']) + '</code>';
+    var certNameInput = document.getElementById('ic-certname');
+    if (certNameInput && !certNameInput.value.trim()) certNameInput.value = course['과정명'];
+  } else {
+    info.innerHTML = '';
+  }
+}
+
+document.getElementById('i-course-select').addEventListener('change', function (e) {
+  state.selectedCourseId = e.target.value;
+  renderCoursePicker();
+  renderMyStudentsTable();
+});
+
+document.getElementById('i-course-link-btn').addEventListener('click', function () {
+  var course = getSelectedCourse();
+  if (!course) return;
+  copyText(studentUrl(course['신청코드']));
+});
+
+document.getElementById('i-refresh-btn').addEventListener('click', function () { loadInstructor(); });
+
+function renderMyStudentsTable() {
+  var tbody = document.querySelector('#i-students-table tbody');
+  tbody.innerHTML = '';
+  var students = state.instructorStudents || [];
+  if (state.selectedCourseId) {
+    students = students.filter(function (s) { return String(s['과정ID']) === String(state.selectedCourseId); });
+  }
+  students.slice().reverse().forEach(function (s) {
+    tbody.innerHTML += '<tr><td>' + fmtDate(s['타임스탬프']) + '</td><td>' + esc(s['구분']) + '</td><td>' + esc(s['신청자 성명']) +
+      '</td><td>' + esc(s['연락처']) + '</td><td>' + esc(s['입금자명']) + '</td><td>' + esc(s['입금일자']) + '</td></tr>';
+  });
+}
+
 document.getElementById('ir-submit-btn').addEventListener('click', function () {
   clearMsg('i-report-msg');
-  var courseId = document.getElementById('ir-course').value;
-  if (!courseId) { setMsg('i-report-msg', 'error', '과정을 선택해주세요.'); return; }
+  var courseId = state.selectedCourseId;
+  if (!courseId) { setMsg('i-report-msg', 'error', '배정된 과정이 없습니다. 협회 운영진에게 문의해주세요.'); return; }
   var fileInput = document.getElementById('ir-file');
   var payload = {
     courseId: courseId,

@@ -231,7 +231,7 @@ function findCourseByCode_(code) {
 function actionGetCourseByCode(code) {
   if (!code) return { ok: false, error: '과정 코드가 없습니다.' };
   var course = findCourseByCode_(code);
-  if (!course) return { ok: false, error: '올바르지 않은 과정 코드입니다. 원장님/강사님께 문의해주세요.' };
+  if (!course) return { ok: false, error: '올바르지 않은 과정 코드입니다. 협회 운영진/강사님께 문의해주세요.' };
   var instructor = findUserById_(course['담당강사아이디']);
   return {
     ok: true,
@@ -616,16 +616,16 @@ function migrateOnce_setupAdminAndInstructors() {
 
   // 1) 관리자 계정 생성 (기존 공유 비밀번호 ai2026 유지, 로그인 후 반드시 변경할 것)
   var adminSalt = Utilities.getUuid();
-  usersSheet.appendRow(['admin', hashPassword_('ai2026', adminSalt), adminSalt, 'admin', '원장님', '', '', '', '', '', true, new Date()]);
+  usersSheet.appendRow(['admin', hashPassword_('ai2026', adminSalt), adminSalt, 'admin', '협회 운영진', '', '', '', '', '', true, new Date()]);
 
-  // 2) 기존 강사계좌 시트 -> 사용자 시트로 이전 (아이디/비밀번호는 강사 전화번호 뒷자리 등으로 원장님이 직접 지정 후 안내)
+  // 2) 기존 강사계좌 시트 -> 사용자 시트로 이전 (아이디/비밀번호는 강사 전화번호 뒷자리 등으로 협회 운영진이 직접 지정 후 안내)
   var certSs = SpreadsheetApp.openById(CERT_SPREADSHEET_ID);
   var accSheet = certSs.getSheetByName('강사계좌');
   if (accSheet) {
     var rows = sheetRowsAsObjects_(accSheet);
     rows.forEach(function (r) {
       if (!r['강사명']) return;
-      var id = r['강사명']; // 임시 아이디 = 강사명. 원장님이 관리자 화면에서 아이디/비번을 재설정해줄 것.
+      var id = r['강사명']; // 임시 아이디 = 강사명. 협회 운영진이 관리자 화면에서 아이디/비번을 재설정해줄 것.
       if (findUserById_(id)) return;
       var salt = Utilities.getUuid();
       var tempPw = '0000';
